@@ -6,6 +6,7 @@ requests
 setuptools
 rich==13.7.1
 
-# explicitly block chromadb and embedchain
-chromadb==0.0.0
-embedchain==0.0.0
+# Patch to avoid chromadb crash on Streamlit Cloud
+# Remove embedchain manually pulled by crewai
+chromadb<0.3.0
+embedchain==0.0.0  # force fail resolution
