@@ -6,7 +6,7 @@ from agents.value_investor import value_investor
 from agents.growth_hacker import growth_hacker
 from agents.sentiment_analyst import sentiment_analyst
 from tools.news_sentiment import fetch_news
-from config import OPENAI_API_KEY, SERPAPI_KEY
+from config import LLM_MODEL
 
 def run_analysis(stock):
     # Tasks
@@ -42,18 +42,12 @@ def run_analysis(stock):
     )
 
     results = crew.kickoff()
-    print(f"Debug - Results type: {type(results)}")
-    print(f"Debug - Results dir: {dir(results)}")
-    print(f"Debug - Results has tasks_output: {hasattr(results, 'tasks_output')}")
-    if hasattr(results, 'tasks_output'):
-        print(f"Debug - Tasks output type: {type(results.tasks_output)}")
-        print(f"Debug - Tasks output length: {len(results.tasks_output) if isinstance(results.tasks_output, list) else 'not a list'}")
     
     if hasattr(results, 'tasks_output') and isinstance(results.tasks_output, list) and len(results.tasks_output) == 4:
         return results.tasks_output[0], results.tasks_output[1], results.tasks_output[2], results.tasks_output[3]
     return None
 
-summary_llm = ChatOpenAI(model="gpt-4", api_key=OPENAI_API_KEY)
+summary_llm = LLM_MODEL
 
 def summarize_insights(stock, risks, value, growth, sentiment):
     summary_prompt = f"""
