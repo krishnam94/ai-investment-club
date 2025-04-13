@@ -4,3 +4,4 @@ langchain==0.1.14
 langchain-openai
 requests
 setuptools
+rich==13.7.1
