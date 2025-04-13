@@ -1,5 +1,6 @@
 from crewai import Agent
-from config import LLM_MODEL
+from langchain_openai import ChatOpenAI
+from config import OPENAI_API_KEY
 
 value_investor = Agent(
     role="Value Investor",
@@ -7,5 +8,5 @@ value_investor = Agent(
     backstory="You look for undervalued stocks based on PE ratios, book value, and long-term potential.",
     verbose=True,
     allow_delegation=False,
-    llm=LLM_MODEL
+    llm=ChatOpenAI(model="gpt-4", api_key=OPENAI_API_KEY)
 )
