@@ -3,3 +3,4 @@ crewai==0.17.0
 langchain==0.1.14
 langchain-openai
 requests
+setuptools
