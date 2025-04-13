@@ -8,11 +8,16 @@ st.title("📊 AI Investment Club")
 st.markdown("Get investment insights from AI-powered analyst personas.")
 
 # Debug: show whether API keys are detected
-# st.sidebar.title("🔐 API Key Check")
-# openai_key = os.getenv("OPENAI_API_KEY")
-# serpapi_key = os.getenv("SERPAPI_KEY")
-# st.sidebar.write("OpenAI Key Found:", bool(openai_key))
-# st.sidebar.write("SerpAPI Key Found:", bool(serpapi_key))
+if os.getenv("OPENAI_API_KEY") and os.getenv("SERPAPI_KEY"):
+    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+    SERPAPI_KEY = os.getenv("SERPAPI_KEY")
+else:
+    import streamlit as st
+    OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
+    SERPAPI_KEY = st.secrets["SERPAPI_KEY"]
+st.sidebar.title("🔐 API Key Check")
+st.sidebar.write("OpenAI Key Found:", bool(OPENAI_API_KEY))
+st.sidebar.write("SerpAPI Key Found:", bool(SERPAPI_KEY))
 
 stock = st.text_input("Enter stock symbol (e.g. AAPL, TSLA, MSFT):", value="AAPL")
 
