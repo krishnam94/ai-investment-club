@@ -1,6 +1,6 @@
 from crewai import Agent
 from langchain_openai import ChatOpenAI
-from config import OPENAI_API_KEY
+from config import LLM_MODEL
 
 risk_analyst = Agent(
     role="Risk Analyst",
@@ -8,5 +8,5 @@ risk_analyst = Agent(
     backstory="You are a cautious and analytical investment advisor who specializes in identifying downside risks.",
     verbose=True,
     allow_delegation=False,
-    llm=ChatOpenAI(model="gpt-4", api_key=OPENAI_API_KEY)
+    llm=LLM_MODEL
 )

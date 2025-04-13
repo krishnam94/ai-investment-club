@@ -1,6 +1,6 @@
 from crewai import Agent
 from langchain_openai import ChatOpenAI
-from config import OPENAI_API_KEY
+from config import LLM_MODEL
 
 sentiment_analyst = Agent(
     role="Sentiment Analyst",
@@ -8,5 +8,5 @@ sentiment_analyst = Agent(
     backstory="You are an expert in financial media analysis, gauging public sentiment using latest headlines.",
     verbose=True,
     allow_delegation=False,
-    llm=ChatOpenAI(model="gpt-4", api_key=OPENAI_API_KEY)
+    llm=LLM_MODEL
 )
