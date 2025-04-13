@@ -8,8 +8,8 @@ Built for demoing autonomous agents and real-time AI-powered financial analysis,
 
 ## 🚀 Live Demo
 
-**[▶️ Try the App on Streamlit Cloud](https://your-streamlit-app-url-here)**  
-*(replace this link with your deployed app)*
+**[▶️ Try the App on Streamlit Cloud](https://ai-investment-club-iw699u5bckes4sqeeyvumk.streamlit.app/)**  
+
 
 ---
 
