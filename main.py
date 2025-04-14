@@ -49,7 +49,7 @@ def run_analysis(stock):
     results = crew.kickoff()
     
     if hasattr(results, 'tasks_output') and isinstance(results.tasks_output, list) and len(results.tasks_output) == 4:
-        return results.tasks_output[0], results.tasks_output[1], results.tasks_output[2], results.tasks_output[3], news_headlines
+        return results.tasks_output[0], results.tasks_output[1], results.tasks_output[2], results.tasks_output[3]
     return None
 
 summary_llm = LLM_MODEL
