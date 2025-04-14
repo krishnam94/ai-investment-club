@@ -47,35 +47,35 @@ def run_analysis(stock):
         return results.tasks_output[0], results.tasks_output[1], results.tasks_output[2], results.tasks_output[3]
     return None
 
-summary_llm = LLM_MODEL
+# summary_llm = LLM_MODEL
 
-def summarize_insights(stock, risks, value, growth, sentiment):
-    summary_prompt = f"""
-    Based on the following analyses for the stock {stock}:
+# def summarize_insights(stock, risks, value, growth, sentiment):
+#     summary_prompt = f"""
+#     Based on the following analyses for the stock {stock}:
 
-    - Risks:
-    {risks}
+#     - Risks:
+#     {risks}
 
-    - Valuation:
-    {value}
+#     - Valuation:
+#     {value}
 
-    - Growth:
-    {growth}
+#     - Growth:
+#     {growth}
 
-    - Sentiment:
-    {sentiment}
+#     - Sentiment:
+#     {sentiment}
 
-    Provide a short summary (2-3 sentences) with an investment recommendation.
-    """
-    return summary_llm.invoke(summary_prompt).content
+#     Provide a short summary (2-3 sentences) with an investment recommendation.
+#     """
+#     return summary_llm.invoke(summary_prompt).content
 
 if __name__ == "__main__":
     stock = sys.argv[1] if len(sys.argv) > 1 else "NVIDIA"
     results = run_analysis(stock)
     if results:
-        summary = summarize_insights(stock, results[0], results[1], results[2], results[3])
+        #summary = summarize_insights(stock, results[0], results[1], results[2], results[3])
         print("\n\n=== Final Summary and Recommendation ===")
-        print(summary)
+        #print(summary)
     else:
         print("Unexpected results format:", results)
 
