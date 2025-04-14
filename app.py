@@ -1,5 +1,5 @@
 import streamlit as st
-from main import run_analysis
+from main import run_analysis, summarize_insights
 import os
 import traceback
 
@@ -17,67 +17,52 @@ import traceback
 
 st.set_page_config(page_title="AI Investment Club", layout="wide")
 
-st.markdown("""
-# 💼 AI Investment Club
+st.title("📊 AI Investment Club")
+st.markdown("Get investment insights from AI-powered analyst personas.")
 
-Welcome to the AI-powered investment advisor. Enter a stock ticker to get a deep-dive analysis from four specialized agents:
-- Risk Analyst 🔍
-- Value Investor 💰
-- Growth Hacker 🚀
-- Sentiment Analyst (with latest news) 📰
+stock = st.text_input("Enter stock symbol (e.g. AAPL, TSLA, MSFT):", value="AAPL")
 
-""")
-
-
-
-with st.container():
-    stock = st.text_input("🔎 Enter stock symbol (e.g. AAPL, TSLA, MSFT):", value="AAPL")
-    run_button = st.button("📈 Run Analysis")
-
-if run_button:
-    with st.spinner("Thinking like an investment club of analysts..."):
+if st.button("Run Analysis"):
+    with st.spinner("Running analysis..."):
         try:
-            import traceback
-            st.info(f"Starting analysis for: `{stock}`")
             results = run_analysis(stock)
-            if results:
+            if results is None:
+                st.error("Analysis failed to generate results. Please try again.")
+            elif not isinstance(results, tuple) or len(results) != 5:
+                st.error(f"Unexpected results format. Got {type(results)} with length {len(results) if hasattr(results, '__len__') else 'N/A'}")
+            else:
                 try:
-                    risks, value, growth, sentiment = results
+                    risks, value, growth, sentiment, news = results
+
+                    st.subheader("🔍 Agent Insights")
                     st.markdown("---")
-                    st.header("🧠 Agent Perspectives")
-
-                    # Highlight sentiment keywords
-                    st.markdown("### 📰 Sentiment Analyst")
-                    highlighted_sentiment = str(sentiment).replace("positive", "**🟢 positive**").replace("negative", "**🔴 negative**").replace("neutral", "**🟡 neutral**")
-                    with st.expander("Sentiment Summary"):
-                        st.markdown(highlighted_sentiment)
-
-                    # Display fetched news if available
-                    if hasattr(results, 'news') and results.news:
-                        with st.expander("📰 Recent News Headlines"):
-                            for line in str(results.news).split(""):
-                                st.markdown(f"- {line.strip()}")
-
                     
-
+                    # Display agent analyses with formatted text
                     with st.expander("💼 Risk Analyst"):
                         st.markdown(f"> {risks.strip() if isinstance(risks, str) else str(risks)}")
-
                     with st.expander("📉 Value Investor"):
                         st.markdown(f"> {value.strip() if isinstance(value, str) else str(value)}")
-
                     with st.expander("🚀 Growth Hacker"):
                         st.markdown(f"> {growth.strip() if isinstance(growth, str) else str(growth)}")
+                    with st.expander("📰 Sentiment Analyst"):
+                        st.markdown(f"> {sentiment.strip() if isinstance(sentiment, str) else str(sentiment)}")
 
-                    
-                    
-                except Exception as unpack_error:
-                    st.error(f"❌ Error processing results: {str(unpack_error)}")
-                    with st.expander("Show traceback"):
+                    st.markdown("---")
+                    st.subheader("💡 Final Investment Summary")
+                    try:
+                        summary = summarize_insights(stock, risks, value, growth, sentiment)
+                        st.success(summary)
+                    except Exception as summary_error:
+                        st.error(f"Error generating summary: {str(summary_error)}")
+                        st.error("Full error details:")
                         st.code(traceback.format_exc())
-            else:
-                st.error("⚠️ Failed to generate analysis. Please check your API keys or try another stock.")
+
+                except Exception as unpack_error:
+                    st.error(f"Error processing results: {str(unpack_error)}")
+                    st.error("Full error details:")
+                    st.code(traceback.format_exc())
+                
         except Exception as e:
-            st.error(f"❌ Something went wrong: {str(e)}")
-            with st.expander("Show traceback"):
-                st.code(traceback.format_exc())
+            st.error(f"Something went wrong: {str(e)}")
+            st.error("Full error details:")
+            st.code(traceback.format_exc())
