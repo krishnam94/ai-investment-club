@@ -28,9 +28,14 @@ def run_analysis(stock):
         agent=growth_hacker
     )
 
-    news_headlines = fetch_news(stock)
+    #news_headlines = fetch_news(stock)
+    # sentiment_task = Task(
+    #     description=f"Given these recent news headlines about {stock}:\n{news_headlines}\n\nAnalyze the overall sentiment and how it might affect investor perception.",
+    #     expected_output="Short summary of public sentiment and potential impact.",
+    #     agent=sentiment_analyst
+    # )
     sentiment_task = Task(
-        description=f"Given these recent news headlines about {stock}:\n{news_headlines}\n\nAnalyze the overall sentiment and how it might affect investor perception.",
+        description=f"Given  recent news headlines about {stock} - Analyze the overall sentiment and how it might affect investor perception.",
         expected_output="Short summary of public sentiment and potential impact.",
         agent=sentiment_analyst
     )
