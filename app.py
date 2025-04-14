@@ -28,11 +28,11 @@ if st.button("Run Analysis"):
             results = run_analysis(stock)
             if results is None:
                 st.error("Analysis failed to generate results. Please try again.")
-            elif not isinstance(results, tuple) or len(results) != 5:
+            elif not isinstance(results, tuple) or len(results) != 4:
                 st.error(f"Unexpected results format. Got {type(results)} with length {len(results) if hasattr(results, '__len__') else 'N/A'}")
             else:
                 try:
-                    risks, value, growth, sentiment, news = results
+                    risks, value, growth, sentiment = results
 
                     st.subheader("🔍 Agent Insights")
                     st.markdown("---")
