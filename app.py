@@ -176,6 +176,24 @@ def display_score(score, label):
 # Input section
 st.markdown("### 🔍 Enter Stock Symbol")
 stock = st.text_input("Stock Symbol (e.g. AAPL, TSLA, MSFT):", value="AAPL", label_visibility="collapsed")
+
+# Reset session state if stock symbol changes
+if 'current_stock' not in st.session_state:
+    st.session_state.current_stock = stock
+elif st.session_state.current_stock != stock:
+    st.session_state.current_stock = stock
+    st.session_state.results = {
+        'risk': None,
+        'value': None,
+        'growth': None,
+        'sentiment': None,
+        'news': None,
+        'summary': None
+    }
+    st.session_state.analysis_started = False
+    st.session_state.analysis_complete = False
+    st.session_state.current_section = None
+
 analyze_clicked = st.button("Analyze")
 
 # Display loading animation
