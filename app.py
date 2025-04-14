@@ -55,7 +55,7 @@ if run_button:
                     # Display fetched news if available
                     if hasattr(results, 'news') and results.news:
                         with st.expander("📰 Recent News Headlines"):
-                            for line in results.news.split(""):
+                            for line in str(results.news).split(""):
                                 st.markdown(f"- {line.strip()}")
 
                     
