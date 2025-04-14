@@ -1,98 +1,192 @@
 import sys
-from crewai import Crew, Task
 from langchain_openai import ChatOpenAI
-from agents.risk_analyst import risk_analyst
-from agents.value_investor import value_investor
-from agents.growth_hacker import growth_hacker
-from agents.sentiment_analyst import sentiment_analyst
 from tools.news_sentiment import fetch_news
 from config import LLM_MODEL
-import time
-from tenacity import retry, stop_after_attempt, wait_exponential
+import logging
 
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
-def run_analysis(stock):
-    # Tasks
-    risk_task = Task(
-        description=f"Analyze the potential financial and geopolitical risks of investing in {stock}.",
-        expected_output="A list of top 3 risks with short justifications.",
-        agent=risk_analyst
-    )
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-    value_task = Task(
-        description=f"Evaluate whether {stock} is undervalued or overvalued based on its financials and fundamentals.",
-        expected_output="A short valuation opinion with key financial metrics.",
-        agent=value_investor
-    )
-
-    growth_task = Task(
-        description=f"Analyze the growth potential of {stock} over the next 2-3 years based on market trends.",
-        expected_output="Top 2-3 growth catalysts and whether it's a buy for growth investors.",
-        agent=growth_hacker
-    )
-
-    #news_headlines = fetch_news(stock)
-    # sentiment_task = Task(
-    #     description=f"Given these recent news headlines about {stock}:\n{news_headlines}\n\nAnalyze the overall sentiment and how it might affect investor perception.",
-    #     expected_output="Short summary of public sentiment and potential impact.",
-    #     agent=sentiment_analyst
-    # )
-    sentiment_task = Task(
-        description=f"Given recent news headlines about {stock} - Analyze the overall sentiment and how it might affect investor perception.",
-        expected_output="Short summary of public sentiment and potential impact.",
-        agent=sentiment_analyst
-    )
-
-    crew = Crew(
-        agents=[risk_analyst, value_investor, growth_hacker, sentiment_analyst],
-        tasks=[risk_task, value_task, growth_task, sentiment_task],
-        verbose=True
-    )
-
+def analyze_risk(stock):
     try:
-        results = crew.kickoff()
-        if hasattr(results, 'tasks_output') and isinstance(results.tasks_output, list) and len(results.tasks_output) == 4:
-            return results.tasks_output[0], results.tasks_output[1], results.tasks_output[2], results.tasks_output[3]
-        return None
+        logger.info(f"Starting risk analysis for {stock}")
+        prompt = f"""Analyze {stock} risks in 3-4 bullet points covering:
+        - Financial risks
+        - Market risks
+        - Regulatory risks
+        Keep it concise.
+        
+        At the end, provide a risk score from 1-10 where:
+        - 1-3: Low risk
+        - 4-6: Moderate risk
+        - 7-10: High risk
+        
+        Format your response as:
+        ANALYSIS: [your analysis]
+        SCORE: [number from 1-10]"""
+        
+        response = LLM_MODEL.invoke(prompt)
+        logger.info("Risk analysis completed")
+        return response.content
     except Exception as e:
-        print(f"Error in run_analysis: {str(e)}")
+        logger.error(f"Error in risk analysis: {str(e)}")
         raise
 
-summary_llm = LLM_MODEL
+def analyze_value(stock):
+    try:
+        logger.info(f"Starting value analysis for {stock}")
+        prompt = f"""Evaluate {stock} valuation in 3-4 bullet points covering:
+        - Current valuation metrics
+        - Historical valuation
+        - Industry comparison
+        Keep it concise.
+        
+        At the end, provide a value score from 1-10 where:
+        - 1-3: Overvalued
+        - 4-6: Fairly valued
+        - 7-10: Undervalued
+        
+        Format your response as:
+        ANALYSIS: [your analysis]
+        SCORE: [number from 1-10]"""
+        
+        response = LLM_MODEL.invoke(prompt)
+        logger.info("Value analysis completed")
+        return response.content
+    except Exception as e:
+        logger.error(f"Error in value analysis: {str(e)}")
+        raise
 
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
+def analyze_growth(stock):
+    try:
+        logger.info(f"Starting growth analysis for {stock}")
+        prompt = f"""Analyze {stock} growth potential in 3-4 bullet points covering:
+        - Revenue growth
+        - Market opportunities
+        - Product pipeline
+        Keep it concise.
+        
+        At the end, provide a growth score from 1-10 where:
+        - 1-3: Low growth potential
+        - 4-6: Moderate growth potential
+        - 7-10: High growth potential
+        
+        Format your response as:
+        ANALYSIS: [your analysis]
+        SCORE: [number from 1-10]"""
+        
+        response = LLM_MODEL.invoke(prompt)
+        logger.info("Growth analysis completed")
+        return response.content
+    except Exception as e:
+        logger.error(f"Error in growth analysis: {str(e)}")
+        raise
+
+def analyze_sentiment(stock):
+    try:
+        logger.info(f"Starting sentiment analysis for {stock}")
+        # First get the news
+        news_items = fetch_news(stock)
+        news_text = "\n".join([item['headline'] for item in news_items])
+        
+        prompt = f"""Analyze sentiment for {stock} based on these headlines:
+        {news_text}
+        
+        Provide a 2-3 sentence summary of:
+        - Overall sentiment
+        - Key themes
+        - Investor impact
+        
+        At the end, provide a sentiment score from 1-10 where:
+        - 1-3: Negative sentiment
+        - 4-6: Neutral sentiment
+        - 7-10: Positive sentiment
+        
+        Format your response as:
+        ANALYSIS: [your analysis]
+        SCORE: [number from 1-10]"""
+        
+        response = LLM_MODEL.invoke(prompt)
+        logger.info("Sentiment analysis completed")
+        return response.content, news_items
+    except Exception as e:
+        logger.error(f"Error in sentiment analysis: {str(e)}")
+        raise
+
+def run_analysis(stock, progress_callback=None):
+    logger.info(f"Starting analysis for stock: {stock}")
+    
+    try:
+        # Risk Analysis
+        logger.info("Starting risk analysis...")
+        if progress_callback:
+            progress_callback("current_section", "risk")
+        risk_result = analyze_risk(stock)
+        if progress_callback:
+            progress_callback("risk", risk_result)
+        
+        # Value Analysis
+        logger.info("Starting value analysis...")
+        if progress_callback:
+            progress_callback("current_section", "value")
+        value_result = analyze_value(stock)
+        if progress_callback:
+            progress_callback("value", value_result)
+        
+        # Growth Analysis
+        logger.info("Starting growth analysis...")
+        if progress_callback:
+            progress_callback("current_section", "growth")
+        growth_result = analyze_growth(stock)
+        if progress_callback:
+            progress_callback("growth", growth_result)
+        
+        # Sentiment Analysis
+        logger.info("Starting sentiment analysis...")
+        if progress_callback:
+            progress_callback("current_section", "sentiment")
+        sentiment_result, news_items = analyze_sentiment(stock)
+        if progress_callback:
+            progress_callback("sentiment", sentiment_result)
+            progress_callback("news", news_items)
+        
+        return risk_result, value_result, growth_result, sentiment_result, news_items
+        
+    except Exception as e:
+        logger.error(f"Error in run_analysis: {str(e)}")
+        raise
+
 def summarize_insights(stock, risks, value, growth, sentiment):
+    logger.info("Starting summary generation...")
     summary_prompt = f"""
-    Based on the following analyses for the stock {stock}:
+    Based on these analyses for {stock}:
 
-    - Risks:
-    {risks}
+    Risks: {risks}
+    Value: {value}
+    Growth: {growth}
+    Sentiment: {sentiment}
 
-    - Valuation:
-    {value}
-
-    - Growth:
-    {growth}
-
-    - Sentiment:
-    {sentiment}
-
-    Provide a short summary (2-3 sentences) with an investment recommendation.
+    Provide a 2-3 sentence investment recommendation.
     """
     try:
-        return summary_llm.invoke(summary_prompt).content
+        logger.info("Generating summary...")
+        result = LLM_MODEL.invoke(summary_prompt).content
+        logger.info("Summary generated successfully")
+        return result
     except Exception as e:
-        print(f"Error in summarize_insights: {str(e)}")
+        logger.error(f"Error in summarize_insights: {str(e)}")
         raise
 
 if __name__ == "__main__":
     stock = sys.argv[1] if len(sys.argv) > 1 else "NVIDIA"
     results = run_analysis(stock)
     if results:
-        summary = summarize_insights(stock, results[0], results[1], results[2], results[3])
+        risks, value, growth, sentiment, news = results
+        summary = summarize_insights(stock, risks, value, growth, sentiment)
         print("\n\n=== Final Summary and Recommendation ===")
         print(summary)
     else:
-        print("Unexpected results format:", results)
+        print("Analysis failed to generate results")
 
 
