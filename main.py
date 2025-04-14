@@ -7,7 +7,10 @@ from agents.growth_hacker import growth_hacker
 from agents.sentiment_analyst import sentiment_analyst
 from tools.news_sentiment import fetch_news
 from config import LLM_MODEL
+import time
+from tenacity import retry, stop_after_attempt, wait_exponential
 
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
 def run_analysis(stock):
     # Tasks
     risk_task = Task(
@@ -35,7 +38,7 @@ def run_analysis(stock):
     #     agent=sentiment_analyst
     # )
     sentiment_task = Task(
-        description=f"Given  recent news headlines about {stock} - Analyze the overall sentiment and how it might affect investor perception.",
+        description=f"Given recent news headlines about {stock} - Analyze the overall sentiment and how it might affect investor perception.",
         expected_output="Short summary of public sentiment and potential impact.",
         agent=sentiment_analyst
     )
@@ -46,14 +49,18 @@ def run_analysis(stock):
         verbose=True
     )
 
-    results = crew.kickoff()
-    
-    if hasattr(results, 'tasks_output') and isinstance(results.tasks_output, list) and len(results.tasks_output) == 4:
-        return results.tasks_output[0], results.tasks_output[1], results.tasks_output[2], results.tasks_output[3]
-    return None
+    try:
+        results = crew.kickoff()
+        if hasattr(results, 'tasks_output') and isinstance(results.tasks_output, list) and len(results.tasks_output) == 4:
+            return results.tasks_output[0], results.tasks_output[1], results.tasks_output[2], results.tasks_output[3]
+        return None
+    except Exception as e:
+        print(f"Error in run_analysis: {str(e)}")
+        raise
 
 summary_llm = LLM_MODEL
 
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
 def summarize_insights(stock, risks, value, growth, sentiment):
     summary_prompt = f"""
     Based on the following analyses for the stock {stock}:
@@ -72,7 +79,11 @@ def summarize_insights(stock, risks, value, growth, sentiment):
 
     Provide a short summary (2-3 sentences) with an investment recommendation.
     """
-    return summary_llm.invoke(summary_prompt).content
+    try:
+        return summary_llm.invoke(summary_prompt).content
+    except Exception as e:
+        print(f"Error in summarize_insights: {str(e)}")
+        raise
 
 if __name__ == "__main__":
     stock = sys.argv[1] if len(sys.argv) > 1 else "NVIDIA"
