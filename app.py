@@ -60,8 +60,8 @@ st.set_page_config(page_title="AI Investment Club", layout="wide")
 # Custom CSS for better styling
 st.markdown("""
     <style>
+    /* Base styles that work in both modes */
     .stExpander {
-        background-color: #f0f2f6;
         border-radius: 10px;
         padding: 1rem;
     }
@@ -73,6 +73,8 @@ st.markdown("""
         margin: 0 auto;
         display: block;
     }
+    
+    /* Score container styles */
     .score-container {
         display: flex;
         align-items: center;
@@ -81,7 +83,7 @@ st.markdown("""
     .score-bar {
         flex-grow: 1;
         height: 10px;
-        background-color: #e0e0e0;
+        background-color: var(--secondary-background-color, #e0e0e0);
         border-radius: 5px;
         margin: 0 10px;
     }
@@ -95,6 +97,8 @@ st.markdown("""
         min-width: 30px;
         text-align: center;
     }
+    
+    /* Loading animation */
     .loading-dots {
         display: flex;
         align-items: center;
@@ -105,6 +109,7 @@ st.markdown("""
     .dot {
         animation: bounce 1.4s infinite;
         margin: 0 5px;
+        color: var(--text-color, #000000);
     }
     .dot:nth-child(1) { animation-delay: 0s; }
     .dot:nth-child(2) { animation-delay: 0.2s; }
@@ -113,21 +118,37 @@ st.markdown("""
         0%, 80%, 100% { transform: translateY(0); }
         40% { transform: translateY(-10px); }
     }
+    
+    /* Analyzing section */
     .analyzing-section {
         display: flex;
         align-items: center;
         padding: 10px;
-        background-color: #f8f9fa;
+        background-color: var(--secondary-background-color, #f8f9fa);
         border-radius: 5px;
         margin: 5px 0;
     }
     .analyzing-icon {
         margin-right: 10px;
         animation: spin 1s linear infinite;
+        color: var(--text-color, #000000);
     }
     @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
+    }
+    
+    /* Dark mode specific overrides */
+    @media (prefers-color-scheme: dark) {
+        .stExpander {
+            background-color: var(--secondary-background-color, #1e1e1e);
+        }
+        .analyzing-section {
+            background-color: var(--secondary-background-color, #2d2d2d);
+        }
+        .score-bar {
+            background-color: var(--secondary-background-color, #3d3d3d);
+        }
     }
     </style>
 """, unsafe_allow_html=True)
